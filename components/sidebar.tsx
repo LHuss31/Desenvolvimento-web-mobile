@@ -3,7 +3,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { usePathname } from "expo-router";
 
-export default function Sidebar() {
+type SidebarProps = {
+  onOpenModal: () => void;
+};
+
+export default function Sidebar({ onOpenModal }: SidebarProps) {
   const pathname = usePathname();
 
   function isActive(route: string) {
@@ -44,7 +48,7 @@ export default function Sidebar() {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onOpenModal}>
         <Text style={styles.buttonText}>Agendar Consulta</Text>
       </TouchableOpacity>
     </View>
