@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -47,30 +47,16 @@ export default function Login() {
         {/* Recuperar senha */}
         <Text style={styles.forgot}>Recuperar senha</Text>
         {/* Botão */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/(app)/inicio")}
+        >
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/register")}>
           <Text>Ainda não tem uma conta? Criar conta</Text>
         </TouchableOpacity>
-
-        {/* Divider */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.line} />
-          <Text style={styles.dividerText}>ou Continuar com:</Text>
-          <View style={styles.line} />
-        </View>
-        {/* Social */}
-        <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialButton}>
-            <Text>Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.socialButton}>
-            <Text>Apple</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </View>
   );
