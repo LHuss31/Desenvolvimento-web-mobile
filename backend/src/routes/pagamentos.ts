@@ -1,0 +1,70 @@
+import { Router } from "express";
+import type { Response } from "express";
+import { eq } from "drizzle-orm";
+import { db } from "../db";
+import { pagamentos, consultas } from "../db/schema";
+import { authenticate } from "../middlewares/auth";
+import type { AuthRequest } from "../middlewares/auth";
+
+const router = Router();
+
+router.use(authenticate);
+
+router.get("/", async (req: AuthRequest, res: Response) => {
+  const { id, tipo } = req.user!;
+
+  const filtro =
+    tipo === "paciente"
+      ? eq(pagamentos.pacienteId, id)
+      : eq(consultas.medicoId, id);
+
+  const lista = await db
+    .select({
+      id: pagamentos.id,
+      valor: pagamentos.valor,
+      status: pagamentos.status,
+      descricao: pagamentos.descricao,
+      criadoEm: pagamentos.criadoEm,
+      consulta: {
+        id: consultas.id,
+        dataHora: consultas.dataHora,
+        tipo: consultas.tipo,
+      },
+    })
+    .from(pagamentos)
+    .leftJoin(consultas, eq(consultas.id, pagamentos.consultaId))
+    .where(filtro);
+
+  res.json(lista);
+});
+
+router.get("/:id", async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+
+  const [pagamento] = await db
+    .select()
+    .from(pagamentos)
+    .where(eq(pagamentos.id, id));
+
+  if (!pagamento) {
+    res.status(404).json({ message: "Pagamento não encontrado." });
+    return;
+  }
+
+  const [consulta] = await db
+    .select({ medicoId: consultas.medicoId })
+    .from(consultas)
+    .where(eq(consultas.id, pagamento.consultaId));
+
+  const pertenceAoUsuario =
+    pagamento.pacienteId === req.user!.id || consulta?.medicoId === req.user!.id;
+
+  if (!pertenceAoUsuario) {
+    res.status(403).json({ message: "Acesso negado." });
+    return;
+  }
+
+  res.json(pagamento);
+});
+
+export default router;
