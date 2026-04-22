@@ -3,6 +3,7 @@ import healthRouter from "./routes/health";
 import authRouter from "./routes/auth";
 import usersRouter from "./routes/users";
 import consultasRouter from "./routes/consultas";
+import protocolosRouter from "./routes/protocolos";
 
 const app = express();
 
@@ -12,5 +13,6 @@ app.use("/api", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/consultas", consultasRouter);
+app.use("/api/protocolos", protocolosRouter);
 
 export default app;
