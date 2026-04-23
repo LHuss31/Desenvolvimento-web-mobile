@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -11,8 +12,18 @@ import { useModal } from "../../hooks/useModal";
 import { useConsultas } from "../../hooks/useConsultas";
 
 export default function Consultas() {
+  const [searchText, setSearchText] = useState("");
   const { setOpenModal } = useModal();
   const { consultas, isLoading, error } = useConsultas();
+
+  const consultasFiltradas = consultas.filter((consulta) => {
+    const searchLower = searchText.toLowerCase();
+    return (
+      consulta.paciente.nome.toLowerCase().includes(searchLower) ||
+      consulta.status.toLowerCase().includes(searchLower) ||
+      consulta.tipo.toLowerCase().includes(searchLower)
+    );
+  });
 
   if (isLoading) {
     return (
@@ -37,7 +48,12 @@ export default function Consultas() {
 
       {/* Topo */}
       <View style={styles.topBar}>
-        <TextInput placeholder="Pesquisar Consulta" style={styles.search} />
+        <TextInput
+          placeholder="Pesquisar Consulta"
+          style={styles.search}
+          value={searchText}
+          onChangeText={setSearchText}
+        />
 
         <TouchableOpacity style={styles.button} onPress={() => setOpenModal(true)}>
           <Text style={styles.buttonText}>Agendar Consulta</Text>
@@ -49,8 +65,12 @@ export default function Consultas() {
         <View style={styles.card}>
           <Text style={styles.emptyText}>Nenhuma consulta agendada</Text>
         </View>
+      ) : consultasFiltradas.length === 0 ? (
+        <View style={styles.card}>
+          <Text style={styles.emptyText}>Nenhuma consulta encontrada</Text>
+        </View>
       ) : (
-        consultas.map((consulta) => (
+        consultasFiltradas.map((consulta) => (
           <View key={consulta.id} style={styles.card}>
             <Text style={styles.header}>{consulta.paciente.nome}</Text>
 
