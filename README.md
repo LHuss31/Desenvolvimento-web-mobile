@@ -119,6 +119,44 @@ Clique em "Agendar Consulta" no sidebar:
 4. Escolha o tipo (Presencial ou Teleconsulta)
 5. Clique em "Agendar"
 
+## 🧪 Testando a API com Scripts
+
+Temos scripts prontos para testar a API automaticamente:
+
+### Windows (PowerShell)
+
+Use o script `backend/curls.ps1` para rodar todos os testes:
+
+```powershell
+cd backend
+.\curls.ps1
+```
+
+O script irá:
+1. ✅ Registrar um paciente de teste
+2. ✅ Registrar um médico de teste
+3. ✅ Fazer login com o médico
+4. ✅ Criar protocolo de emagrecimento
+5. ✅ Criar protocolo de hipertrofia
+
+**Nota:** Se receber erro de "scripts desativados", execute uma vez:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### macOS / Linux
+
+Use o script `backend/curls.sh`:
+
+```bash
+cd backend
+bash curls.sh
+```
+
+### Manual (Qualquer SO)
+
+Veja exemplos completos em `backend/README.md` para criar requisições manualmente.
+
 ## 🛠️ Estrutura do Projeto
 
 ```
