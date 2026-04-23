@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { usePathname } from "expo-router";
+import { useAuth } from "../hooks/auth/useAuth";
 
 type SidebarProps = {
   onOpenModal: () => void;
@@ -9,6 +10,12 @@ type SidebarProps = {
 
 export default function Sidebar({ onOpenModal }: SidebarProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
 
   function isActive(route: string) {
     return pathname.includes(route);
@@ -51,6 +58,10 @@ export default function Sidebar({ onOpenModal }: SidebarProps) {
       <TouchableOpacity style={styles.button} onPress={onOpenModal}>
         <Text style={styles.buttonText}>Agendar Consulta</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -90,6 +101,21 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  logoutButton: {
+    marginTop: 10,
+    backgroundColor: "#d32f2f",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  logoutButtonText: {
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
