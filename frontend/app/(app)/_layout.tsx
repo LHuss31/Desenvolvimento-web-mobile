@@ -1,9 +1,24 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useAuth } from "../../hooks/auth/useAuth";
 import Sidebar from "../../components/sidebar";
 
 export default function AppLayout() {
+  const { token, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#19c10f" />
+      </View>
+    );
+  }
+
+  if (!token) {
+    return <Redirect href="/login" />;
+  }
+
   const [openSidebar, setOpenSidebar] = useState(true);
 
   // modal

@@ -1,21 +1,21 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRegister } from "../hooks/auth/useRegister";
+
 export default function Register() {
   const [tipo, setTipo] = useState<"paciente" | "medico">("paciente");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
-  function handleRegister() {
-    console.log({ tipo, nome, email, senha });
-  }
+  const { handleRegister, isLoading, error } = useRegister();
 
   return (
     <View style={styles.container}>
@@ -86,11 +86,18 @@ export default function Register() {
           Concordo com os <Text style={styles.link}>Termos e Condições</Text>
         </Text>
 
+        {error && <Text style={styles.error}>{error}</Text>}
+
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/(app)/inicio")}
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={() => handleRegister({ nome, email, senha, tipo })}
+          disabled={isLoading}
         >
-          <Text style={styles.buttonText}>Criar conta</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Criar conta</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/login")}>
@@ -200,9 +207,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+
+  error: {
+    color: "#e53935",
+    fontSize: 13,
+    marginTop: 8,
   },
 
   dividerContainer: {

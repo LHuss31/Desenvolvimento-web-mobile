@@ -1,19 +1,19 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useLogin } from "../hooks/auth/useLogin";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
-  function handleLogin() {
-    console.log(email, senha);
-  }
+  const { handleLogin, isLoading, error } = useLogin();
 
   return (
     <View style={styles.container}>
@@ -34,6 +34,8 @@ export default function Login() {
           value={email}
           onChangeText={setEmail}
           style={styles.input}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
         {/* Senha */}
         <Text style={styles.label}>Senha:</Text>
@@ -44,14 +46,22 @@ export default function Login() {
           secureTextEntry
           style={styles.input}
         />
+
+        {error && <Text style={styles.error}>{error}</Text>}
+
         {/* Recuperar senha */}
         <Text style={styles.forgot}>Recuperar senha</Text>
         {/* Botão */}
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/(app)/inicio")}
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={() => handleLogin(email, senha)}
+          disabled={isLoading}
         >
-          <Text style={styles.buttonText}>Entrar</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Entrar</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/register")}>
@@ -142,9 +152,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+
+  error: {
+    color: "#e53935",
+    fontSize: 13,
+    marginTop: 8,
   },
 
   dividerContainer: {
