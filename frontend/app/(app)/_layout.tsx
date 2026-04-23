@@ -19,7 +19,7 @@ export default function AppLayout() {
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<"ativo" | "async">("ativo");
+  const [selectedType, setSelectedType] = useState<"presencial" | "teleconsulta">("presencial");
 
   if (isLoading) {
     return (
@@ -68,7 +68,7 @@ export default function AppLayout() {
       setSelectedDoctorId(null);
       setSelectedDate(null);
       setSelectedTime(null);
-      setSelectedType("ativo");
+      setSelectedType("presencial");
       alert("Consulta agendada com sucesso!");
     } catch (error) {
       alert("Erro ao agendar consulta");
@@ -81,7 +81,7 @@ export default function AppLayout() {
     setSelectedDoctorId(null);
     setSelectedDate(null);
     setSelectedTime(null);
-    setSelectedType("ativo");
+    setSelectedType("presencial");
   };
 
   return (
@@ -193,7 +193,14 @@ export default function AppLayout() {
                       ]}
                       onPress={() => setSelectedTime(time)}
                     >
-                      <Text style={{ color: "#fff" }}>{time}</Text>
+                      <Text
+                        style={[
+                          styles.timeButtonText,
+                          selectedTime === time && styles.selectedTimeButtonText,
+                        ]}
+                      >
+                        {time}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -204,34 +211,34 @@ export default function AppLayout() {
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      selectedType === "ativo" && styles.selectedTypeButton,
+                      selectedType === "presencial" && styles.selectedTypeButton,
                     ]}
-                    onPress={() => setSelectedType("ativo")}
+                    onPress={() => setSelectedType("presencial")}
                   >
                     <Text
                       style={[
                         styles.typeButtonText,
-                        selectedType === "ativo" && styles.selectedTypeButtonText,
+                        selectedType === "presencial" && styles.selectedTypeButtonText,
                       ]}
                     >
-                      Ativo
+                      Presencial
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      selectedType === "async" && styles.selectedTypeButton,
+                      selectedType === "teleconsulta" && styles.selectedTypeButton,
                     ]}
-                    onPress={() => setSelectedType("async")}
+                    onPress={() => setSelectedType("teleconsulta")}
                   >
                     <Text
                       style={[
                         styles.typeButtonText,
-                        selectedType === "async" && styles.selectedTypeButtonText,
+                        selectedType === "teleconsulta" && styles.selectedTypeButtonText,
                       ]}
                     >
-                      Async
+                      Teleconsulta
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -366,6 +373,15 @@ const styles = StyleSheet.create({
   selectedTimeButton: {
     backgroundColor: "#19c10f",
     borderColor: "#19c10f",
+  },
+
+  timeButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+
+  selectedTimeButtonText: {
+    color: "#fff",
   },
 
   typeContainer: {
