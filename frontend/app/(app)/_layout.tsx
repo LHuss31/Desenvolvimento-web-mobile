@@ -13,6 +13,14 @@ export default function AppLayout() {
   const { medicos, isLoading: loadingMedicos } = useMedicos();
   const { agendar, isLoading: agendando } = useAgendarConsulta();
 
+  // modal
+  const [openSidebar, setOpenSidebar] = useState(true);
+  const [step, setStep] = useState(1);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<"ativo" | "async">("ativo");
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -24,15 +32,6 @@ export default function AppLayout() {
   if (!token) {
     return <Redirect href="/login" />;
   }
-
-  const [openSidebar, setOpenSidebar] = useState(true);
-
-  // modal
-  const [step, setStep] = useState(1);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<"ativo" | "async">("ativo");
 
   const getNextDays = () => {
     const days = [];
