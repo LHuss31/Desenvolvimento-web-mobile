@@ -26,6 +26,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       id: protocolos.id,
       titulo: protocolos.titulo,
       tipo: protocolos.tipo,
+      conteudoExercicios: protocolos.conteudoExercicios,
+      conteudoDieta: protocolos.conteudoDieta,
       caloriasTotal: protocolos.caloriasTotal,
       versao: protocolos.versao,
       criadoEm: protocolos.criadoEm,
