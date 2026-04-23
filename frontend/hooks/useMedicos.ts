@@ -21,11 +21,8 @@ export function useMedicos() {
       return;
     }
 
-    apiFetch<Medico[]>("/api/users", { token })
-      .then((users) => {
-        const medicosOnly = users.filter((u) => u.tipo === "medico");
-        setMedicos(medicosOnly);
-      })
+    apiFetch<Medico[]>("/api/users/medicos", { token })
+      .then(setMedicos)
       .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));
   }, [token]);

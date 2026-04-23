@@ -11,6 +11,20 @@ import type { UpdateMeBody } from "../schemas/user.schema";
 
 const router = Router();
 
+router.get("/medicos", authenticate, async (req: AuthRequest, res: Response) => {
+  const medicos = await db
+    .select({
+      id: usuarios.id,
+      nome: usuarios.nome,
+      email: usuarios.email,
+      tipo: usuarios.tipo,
+    })
+    .from(usuarios)
+    .where(eq(usuarios.tipo, "medico"));
+
+  res.json(medicos);
+});
+
 router.get("/me", authenticate, async (req: AuthRequest, res: Response) => {
   const [usuario] = await db
     .select({
