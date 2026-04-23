@@ -9,6 +9,8 @@ export type Protocolo = {
   caloriasTotal: number | null;
   versao: number;
   criadoEm: string;
+  conteudoExercicios?: string | any[] | null;
+  conteudoDieta?: string | any[] | null;
   medico: { id: number; nome: string };
 };
 
