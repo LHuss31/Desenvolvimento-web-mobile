@@ -91,6 +91,24 @@ export default function Consultas() {
                 <Text>{consulta.status}</Text>
               </View>
             </View>
+
+            <View style={styles.row}>
+              <View>
+                <Text style={styles.label}>Documentos</Text>
+                <TouchableOpacity style={styles.docButton}>
+                  <Text>Ver documentos</Text>
+                </TouchableOpacity>
+              </View>
+
+              {consulta.tipo === "teleconsulta" && (
+                <View>
+                  <Text style={styles.label}>Reunião</Text>
+                  <TouchableOpacity style={styles.meetButton}>
+                    <Text style={{ color: "#fff" }}>Entrar via meet</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
         ))
       )}
@@ -194,5 +212,17 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 16,
     textAlign: "center",
+  },
+
+  docButton: {
+    backgroundColor: "#ddd",
+    padding: 8,
+    borderRadius: 8,
+  },
+
+  meetButton: {
+    backgroundColor: "#19c10f",
+    padding: 8,
+    borderRadius: 8,
   },
 });
