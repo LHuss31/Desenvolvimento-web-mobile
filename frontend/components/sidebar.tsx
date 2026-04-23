@@ -3,14 +3,12 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { usePathname } from "expo-router";
 import { useAuth } from "../hooks/auth/useAuth";
+import { useModal } from "../hooks/useModal";
 
-type SidebarProps = {
-  onOpenModal: () => void;
-};
-
-export default function Sidebar({ onOpenModal }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { setOpenModal } = useModal();
 
   async function handleLogout() {
     await logout();
@@ -55,7 +53,7 @@ export default function Sidebar({ onOpenModal }: SidebarProps) {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={onOpenModal}>
+      <TouchableOpacity style={styles.button} onPress={() => setOpenModal(true)}>
         <Text style={styles.buttonText}>Agendar Consulta</Text>
       </TouchableOpacity>
 

@@ -6,8 +6,11 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useModal } from "../../hooks/useModal";
 
 export default function Consultas() {
+  const { setOpenModal } = useModal();
+
   return (
     <ScrollView style={styles.container}>
       {/* Título */}
@@ -17,7 +20,7 @@ export default function Consultas() {
       <View style={styles.topBar}>
         <TextInput placeholder="Pesquisar Consulta" style={styles.search} />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => setOpenModal(true)}>
           <Text style={styles.buttonText}>Agendar Consulta</Text>
         </TouchableOpacity>
       </View>

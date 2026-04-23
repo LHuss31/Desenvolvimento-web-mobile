@@ -2,10 +2,12 @@ import { Redirect, Stack } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../hooks/auth/useAuth";
+import { useModal } from "../../hooks/useModal";
 import Sidebar from "../../components/sidebar";
 
 export default function AppLayout() {
   const { token, isLoading } = useAuth();
+  const { openModal, setOpenModal } = useModal();
 
   if (isLoading) {
     return (
@@ -22,14 +24,13 @@ export default function AppLayout() {
   const [openSidebar, setOpenSidebar] = useState(true);
 
   // modal
-  const [openModal, setOpenModal] = useState(false);
   const [step, setStep] = useState(1);
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
 
   return (
     <View style={styles.container}>
       {/* Sidebar */}
-      {openSidebar && <Sidebar onOpenModal={() => setOpenModal(true)} />}
+      {openSidebar && <Sidebar />}
 
       <View style={styles.content}>
         {/* Toggle */}
