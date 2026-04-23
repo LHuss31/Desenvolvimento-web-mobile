@@ -3,11 +3,15 @@ import { useState } from "react";
 import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useModal } from "../../hooks/useModal";
+import { useMedicos } from "../../hooks/useMedicos";
+import { useAgendarConsulta } from "../../hooks/useAgendarConsulta";
 import Sidebar from "../../components/sidebar";
 
 export default function AppLayout() {
   const { token, isLoading } = useAuth();
   const { openModal, setOpenModal } = useModal();
+  const { medicos, isLoading: loadingMedicos } = useMedicos();
+  const { agendar, isLoading: agendando } = useAgendarConsulta();
 
   if (isLoading) {
     return (
@@ -25,8 +29,10 @@ export default function AppLayout() {
 
   // modal
   const [step, setStep] = useState(1);
-  const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<"ativo" | "async">("ativo");
 
   const getNextDays = () => {
     const days = [];
@@ -37,6 +43,46 @@ export default function AppLayout() {
       days.push(date);
     }
     return days;
+  };
+
+  const selectedDoctor = medicos.find((m) => m.id === selectedDoctorId);
+
+  const handleAgendar = async () => {
+    if (!selectedDoctorId || !selectedDate || !selectedTime) {
+      alert("Selecione médico, data e horário");
+      return;
+    }
+
+    const [hours, minutes] = selectedTime.split(":").map(Number);
+    const dataHora = new Date(selectedDate);
+    dataHora.setHours(hours, minutes, 0, 0);
+
+    try {
+      await agendar({
+        medicoId: selectedDoctorId,
+        dataHora: dataHora.toISOString(),
+        tipo: selectedType,
+      });
+
+      setOpenModal(false);
+      setStep(1);
+      setSelectedDoctorId(null);
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setSelectedType("ativo");
+      alert("Consulta agendada com sucesso!");
+    } catch (error) {
+      alert("Erro ao agendar consulta");
+    }
+  };
+
+  const closeModal = () => {
+    setOpenModal(false);
+    setStep(1);
+    setSelectedDoctorId(null);
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setSelectedType("ativo");
   };
 
   return (
@@ -60,42 +106,41 @@ export default function AppLayout() {
       <Modal visible={openModal} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            {/* STEP 1 */}
+            {/* STEP 1 - Selecionar Médico */}
             {step === 1 && (
               <>
                 <Text style={styles.title}>Nova Consulta</Text>
 
-                <View style={styles.grid}>
-                  {["Dr. Anda", "Dr. Ken", "Dr. Ru", "Dr. Opeor"].map(
-                    (doc, i) => (
+                {loadingMedicos ? (
+                  <ActivityIndicator size="large" color="#19c10f" style={{ marginTop: 20 }} />
+                ) : medicos.length === 0 ? (
+                  <Text style={styles.emptyText}>Nenhum médico disponível</Text>
+                ) : (
+                  <View style={styles.grid}>
+                    {medicos.map((medico) => (
                       <TouchableOpacity
-                        key={i}
+                        key={medico.id}
                         style={[
                           styles.card,
-                          selectedDoctor === doc && styles.selectedCard,
+                          selectedDoctorId === medico.id && styles.selectedCard,
                         ]}
-                        onPress={() => setSelectedDoctor(doc)}
+                        onPress={() => setSelectedDoctorId(medico.id)}
                       >
-                        <Text>{doc}</Text>
+                        <Text>{medico.nome}</Text>
                       </TouchableOpacity>
-                    ),
-                  )}
-                </View>
+                    ))}
+                  </View>
+                )}
 
                 <View style={styles.actions}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setOpenModal(false);
-                      setStep(1);
-                      setSelectedDate(null);
-                    }}
-                  >
+                  <TouchableOpacity onPress={closeModal}>
                     <Text>Cancelar</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.button}
                     onPress={() => setStep(2)}
+                    disabled={!selectedDoctorId}
                   >
                     <Text style={styles.buttonText}>Continuar</Text>
                   </TouchableOpacity>
@@ -103,10 +148,10 @@ export default function AppLayout() {
               </>
             )}
 
-            {/* STEP 2 */}
+            {/* STEP 2 - Selecionar Data, Hora e Tipo */}
             {step === 2 && (
               <>
-                <Text style={styles.title}>{selectedDoctor}</Text>
+                <Text style={styles.title}>{selectedDoctor?.nome}</Text>
 
                 <Text style={{ marginTop: 10, fontWeight: "600" }}>Selecione a data</Text>
 
@@ -140,13 +185,56 @@ export default function AppLayout() {
                 <Text style={{ marginTop: 20, fontWeight: "600" }}>Horários disponíveis</Text>
 
                 <View style={styles.times}>
-                  {["08:00", "10:00", "14:00", "16:00", "18:00"].map(
-                    (time, i) => (
-                      <TouchableOpacity key={i} style={styles.timeButton}>
-                        <Text style={{ color: "#fff" }}>{time}</Text>
-                      </TouchableOpacity>
-                    ),
-                  )}
+                  {["08:00", "10:00", "14:00", "16:00", "18:00"].map((time, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={[
+                        styles.timeButton,
+                        selectedTime === time && styles.selectedTimeButton,
+                      ]}
+                      onPress={() => setSelectedTime(time)}
+                    >
+                      <Text style={{ color: "#fff" }}>{time}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={{ marginTop: 20, fontWeight: "600" }}>Tipo de Consulta</Text>
+
+                <View style={styles.typeContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      selectedType === "ativo" && styles.selectedTypeButton,
+                    ]}
+                    onPress={() => setSelectedType("ativo")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedType === "ativo" && styles.selectedTypeButtonText,
+                      ]}
+                    >
+                      Ativo
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      selectedType === "async" && styles.selectedTypeButton,
+                    ]}
+                    onPress={() => setSelectedType("async")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedType === "async" && styles.selectedTypeButtonText,
+                      ]}
+                    >
+                      Async
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
                 <View style={styles.actions}>
@@ -155,14 +243,15 @@ export default function AppLayout() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      setOpenModal(false);
-                      setStep(1);
-                      setSelectedDate(null);
-                    }}
+                    style={[styles.button, agendando && styles.buttonDisabled]}
+                    onPress={handleAgendar}
+                    disabled={agendando || !selectedDate || !selectedTime}
                   >
-                    <Text style={styles.buttonText}>Agendar</Text>
+                    {agendando ? (
+                      <ActivityIndicator color="#fff" size="small" />
+                    ) : (
+                      <Text style={styles.buttonText}>Agendar</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </>
@@ -173,6 +262,7 @@ export default function AppLayout() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -201,6 +291,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 15,
+    maxHeight: "90%",
   },
 
   title: {
@@ -266,9 +357,46 @@ const styles = StyleSheet.create({
   },
 
   timeButton: {
-    backgroundColor: "#19c10f",
+    backgroundColor: "#eee",
     padding: 10,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  selectedTimeButton: {
+    backgroundColor: "#19c10f",
+    borderColor: "#19c10f",
+  },
+
+  typeContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+  },
+
+  typeButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+  },
+
+  selectedTypeButton: {
+    backgroundColor: "#19c10f",
+    borderColor: "#19c10f",
+  },
+
+  typeButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+
+  selectedTypeButtonText: {
+    color: "#fff",
   },
 
   actions: {
@@ -281,10 +409,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#19c10f",
     padding: 10,
     borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
   },
 
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+
+  emptyText: {
+    textAlign: "center",
+    color: "#999",
+    marginTop: 20,
   },
 });
