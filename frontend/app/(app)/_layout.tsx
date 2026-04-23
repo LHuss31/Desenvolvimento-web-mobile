@@ -26,6 +26,18 @@ export default function AppLayout() {
   // modal
   const [step, setStep] = useState(1);
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const getNextDays = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      days.push(date);
+    }
+    return days;
+  };
 
   return (
     <View style={styles.container}>
@@ -75,6 +87,7 @@ export default function AppLayout() {
                     onPress={() => {
                       setOpenModal(false);
                       setStep(1);
+                      setSelectedDate(null);
                     }}
                   >
                     <Text>Cancelar</Text>
@@ -95,7 +108,36 @@ export default function AppLayout() {
               <>
                 <Text style={styles.title}>{selectedDoctor}</Text>
 
-                <Text style={{ marginTop: 10 }}>Horários disponíveis</Text>
+                <Text style={{ marginTop: 10, fontWeight: "600" }}>Selecione a data</Text>
+
+                <View style={styles.datesContainer}>
+                  {getNextDays().map((date, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={[
+                        styles.dateButton,
+                        selectedDate?.toDateString() === date.toDateString() &&
+                          styles.selectedDateButton,
+                      ]}
+                      onPress={() => setSelectedDate(date)}
+                    >
+                      <Text
+                        style={[
+                          styles.dateButtonText,
+                          selectedDate?.toDateString() === date.toDateString() &&
+                            styles.selectedDateButtonText,
+                        ]}
+                      >
+                        {date.toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={{ marginTop: 20, fontWeight: "600" }}>Horários disponíveis</Text>
 
                 <View style={styles.times}>
                   {["08:00", "10:00", "14:00", "16:00", "18:00"].map(
@@ -117,6 +159,7 @@ export default function AppLayout() {
                     onPress={() => {
                       setOpenModal(false);
                       setStep(1);
+                      setSelectedDate(null);
                     }}
                   >
                     <Text style={styles.buttonText}>Agendar</Text>
@@ -181,6 +224,38 @@ const styles = StyleSheet.create({
 
   selectedCard: {
     backgroundColor: "#d4f7d4",
+  },
+
+  datesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 10,
+    maxHeight: 120,
+  },
+
+  dateButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  selectedDateButton: {
+    backgroundColor: "#19c10f",
+    borderColor: "#19c10f",
+  },
+
+  dateButtonText: {
+    color: "#333",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+
+  selectedDateButtonText: {
+    color: "#fff",
   },
 
   times: {
