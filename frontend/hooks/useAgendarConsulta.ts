@@ -5,7 +5,7 @@ import { apiFetch } from "../lib/api";
 type AgendarConsultaPayload = {
   medicoId: number;
   dataHora: string;
-  tipo: "ativo" | "async";
+  tipo: "presencial" | "teleconsulta";
 };
 
 export function useAgendarConsulta() {
