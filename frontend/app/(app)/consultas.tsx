@@ -49,7 +49,8 @@ export default function Consultas() {
       {/* Topo */}
       <View style={styles.topBar}>
         <TextInput
-          placeholder="Pesquisar Consulta"
+          placeholder="Buscar por nome, tipo ou status..."
+          placeholderTextColor="#999"
           style={styles.search}
           value={searchText}
           onChangeText={setSearchText}
