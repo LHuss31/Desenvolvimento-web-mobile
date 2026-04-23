@@ -27,7 +27,7 @@ export const nivelAtividadeEnum = pgEnum("nivel_atividade", [
   "moderado",
   "intenso",
 ]);
-export const tipoConsultaEnum = pgEnum("tipo_consulta", ["ativo", "async"]);
+export const tipoConsultaEnum = pgEnum("tipo_consulta", ["presencial", "teleconsulta"]);
 
 export const usuarios = pgTable("usuarios", {
   id: serial("id").primaryKey(),

@@ -197,3 +197,6 @@ Para modificar o schema do banco:
 1. Edite os arquivos em `src/db/schema/`
 2. Execute `npm run db:generate`
 3. Execute `npm run db:migrate`
+
+
+psql "postgresql://vitalgoal:vitalgoal@localhost:5435/vitalgoal" -c "SELECT id, paciente_id, medico_id, tipo, status FROM consultas;"
