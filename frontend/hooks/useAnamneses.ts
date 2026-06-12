@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "./auth/useAuth";
 import { apiFetch } from "../lib/api";
+import { useAuth } from "./auth/useAuth";
 
 export type AnamneseMedico = {
   id: number;

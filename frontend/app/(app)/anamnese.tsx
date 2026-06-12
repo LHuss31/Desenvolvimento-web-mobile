@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,10 +10,11 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../hooks/auth/useAuth";
-import { useAnamneses } from "../../hooks/useAnamneses";
+import { useAnamnese } from "../../hooks/useAnamnese";
 import type { AnamneseMedico } from "../../hooks/useAnamneses";
+import { useAnamneses } from "../../hooks/useAnamneses";
 
-// ─── Medico view ────────────────────────────────────────────────────────────
+// ─── Medico view ─────────────────────────────────────────────────────────────
 
 function MedicoAnamnese() {
   const { anamneses, isLoading, error } = useAnamneses();
@@ -21,7 +23,7 @@ function MedicoAnamnese() {
   const [selected, setSelected] = useState<AnamneseMedico | null>(null);
 
   const filtered = anamneses.filter((a) =>
-    a.pacienteNome?.toLowerCase().includes(search.toLowerCase())
+    a.pacienteNome?.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (isLoading) {
@@ -52,14 +54,26 @@ function MedicoAnamnese() {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Dados básicos</Text>
           <View style={styles.row}>
-            <InfoItem label="Idade" value={selected.idade ? `${selected.idade} anos` : null} />
-            <InfoItem label="Peso" value={selected.peso ? `${selected.peso} kg` : null} />
-            <InfoItem label="Altura" value={selected.altura ? `${selected.altura} cm` : null} />
-            <InfoItem label="IMC" value={selected.bmi ?? null} />
+            <InfoItem
+              label="Idade"
+              value={selected.idade ? `${selected.idade} anos` : null}
+            />
+            <InfoItem
+              label="Peso"
+              value={selected.peso ? `${selected.peso} kg` : null}
+            />
+            <InfoItem
+              label="Altura"
+              value={selected.altura ? `${selected.altura} cm` : null}
+            />
+            <InfoItem
+              label="IMC"
+              value={selected.bmi != null ? String(selected.bmi) : null}
+            />
           </View>
         </View>
 
-        {(selected.condicoesSaude?.length || selected.alergias) ? (
+        {selected.condicoesSaude?.length || selected.alergias ? (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Histórico de saúde</Text>
             {selected.condicoesSaude?.length ? (
@@ -67,7 +81,9 @@ function MedicoAnamnese() {
                 <Text style={styles.label}>Condições</Text>
                 <View style={styles.tagRow}>
                   {selected.condicoesSaude.map((c) => (
-                    <View key={c} style={styles.tag}><Text style={styles.tagText}>{c}</Text></View>
+                    <View key={c} style={styles.tag}>
+                      <Text style={styles.tagText}>{c}</Text>
+                    </View>
                   ))}
                 </View>
               </>
@@ -81,21 +97,34 @@ function MedicoAnamnese() {
           </View>
         ) : null}
 
-        {(selected.nivelAtividade || selected.tipoAlimentacao?.length || selected.habitos?.length || selected.horasSono) ? (
+        {selected.nivelAtividade ||
+        selected.tipoAlimentacao?.length ||
+        selected.habitos?.length ||
+        selected.horasSono ? (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Estilo de vida</Text>
             {selected.horasSono ? (
-              <InfoItem label="Horas de sono" value={`${selected.horasSono}h`} />
+              <InfoItem
+                label="Horas de sono"
+                value={`${selected.horasSono}h`}
+              />
             ) : null}
             {selected.nivelAtividade ? (
-              <InfoItem label="Atividade física" value={selected.nivelAtividade} />
+              <InfoItem
+                label="Atividade física"
+                value={selected.nivelAtividade}
+              />
             ) : null}
             {selected.tipoAlimentacao?.length ? (
               <>
-                <Text style={[styles.label, { marginTop: 12 }]}>Alimentação</Text>
+                <Text style={[styles.label, { marginTop: 12 }]}>
+                  Alimentação
+                </Text>
                 <View style={styles.tagRow}>
                   {selected.tipoAlimentacao.map((t) => (
-                    <View key={t} style={styles.tag}><Text style={styles.tagText}>{t}</Text></View>
+                    <View key={t} style={styles.tag}>
+                      <Text style={styles.tagText}>{t}</Text>
+                    </View>
                   ))}
                 </View>
               </>
@@ -105,7 +134,9 @@ function MedicoAnamnese() {
                 <Text style={[styles.label, { marginTop: 12 }]}>Hábitos</Text>
                 <View style={styles.tagRow}>
                   {selected.habitos.map((h) => (
-                    <View key={h} style={styles.tag}><Text style={styles.tagText}>{h}</Text></View>
+                    <View key={h} style={styles.tag}>
+                      <Text style={styles.tagText}>{h}</Text>
+                    </View>
                   ))}
                 </View>
               </>
@@ -121,7 +152,8 @@ function MedicoAnamnese() {
         ) : null}
 
         <Text style={styles.footerMeta}>
-          Atualizado em {new Date(selected.atualizadoEm).toLocaleDateString("pt-BR")}
+          Atualizado em{" "}
+          {new Date(selected.atualizadoEm).toLocaleDateString("pt-BR")}
         </Text>
 
         <View style={{ height: 40 }} />
@@ -155,18 +187,32 @@ function MedicoAnamnese() {
         {filtered.map((a) => (
           <Pressable
             key={a.id}
-            style={({ pressed }) => [styles.card, styles.patientCard, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              styles.card,
+              styles.patientCard,
+              pressed && { opacity: 0.8 },
+            ]}
             onPress={() => setSelected(a)}
           >
             <Text style={styles.patientName}>{a.pacienteNome}</Text>
             <View style={styles.summaryRow}>
-              {a.idade ? <Text style={styles.summaryItem}>{a.idade} anos</Text> : null}
-              {a.peso ? <Text style={styles.summaryItem}>{a.peso} kg</Text> : null}
-              {a.altura ? <Text style={styles.summaryItem}>{a.altura} cm</Text> : null}
-              {a.bmi ? <Text style={styles.summaryItem}>IMC {a.bmi}</Text> : null}
+              {a.idade ? (
+                <Text style={styles.summaryItem}>{a.idade} anos</Text>
+              ) : null}
+              {a.peso ? (
+                <Text style={styles.summaryItem}>{a.peso} kg</Text>
+              ) : null}
+              {a.altura ? (
+                <Text style={styles.summaryItem}>{a.altura} cm</Text>
+              ) : null}
+              {a.bmi ? (
+                <Text style={styles.summaryItem}>IMC {a.bmi}</Text>
+              ) : null}
             </View>
             {a.objetivo ? (
-              <Text style={styles.summaryObjective} numberOfLines={2}>{a.objetivo}</Text>
+              <Text style={styles.summaryObjective} numberOfLines={2}>
+                {a.objetivo}
+              </Text>
             ) : null}
             <Text style={styles.summaryDate}>
               {new Date(a.atualizadoEm).toLocaleDateString("pt-BR")}
@@ -188,7 +234,7 @@ function InfoItem({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-// ─── Patient view (existing form) ───────────────────────────────────────────
+// ─── Opcoes ──────────────────────────────────────────────────────────────────
 
 const HISTORICO_OPCOES = [
   "Hipertensão",
@@ -198,7 +244,13 @@ const HISTORICO_OPCOES = [
   "Problemas ortopédicos",
 ];
 
-const ATIVIDADE_OPCOES = ["Sedentário", "Leve", "Moderado", "Intenso"];
+const ATIVIDADE_OPCOES = [
+  { label: "Sedentário", value: "sedentario" },
+  { label: "Leve", value: "leve" },
+  { label: "Moderado", value: "moderado" },
+  { label: "Intenso", value: "intenso" },
+] as const;
+
 const ALIMENTACAO_OPCOES = ["Vegetariana", "Vegana", "Low carb", "Omnívora"];
 const HABITOS_OPCOES = [
   "Não fumo",
@@ -207,6 +259,8 @@ const HABITOS_OPCOES = [
   "Não bebo",
   "Bebo socialmente",
 ];
+
+// ─── CheckGroup ───────────────────────────────────────────────────────────────
 
 function CheckGroup({
   opcoes,
@@ -244,6 +298,44 @@ function CheckGroup({
   );
 }
 
+// ─── RadioGroup ───────────────────────────────────────────────────────────────
+
+function RadioGroup({
+  opcoes,
+  selected,
+  onSelect,
+}: {
+  opcoes: readonly { label: string; value: string }[];
+  selected: string;
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <View style={check.grid}>
+      {opcoes.map((item) => {
+        const ativo = selected === item.value;
+        return (
+          <Pressable
+            key={item.value}
+            style={({ pressed }) => [
+              check.item,
+              ativo && check.itemActive,
+              pressed && { opacity: 0.75 },
+            ]}
+            onPress={() => onSelect(item.value)}
+          >
+            <Text style={[check.icon, ativo && check.iconActive]}>
+              {ativo ? "◉" : "○"}
+            </Text>
+            <Text style={[check.label, ativo && check.labelActive]}>
+              {item.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const check = StyleSheet.create({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
   item: {
@@ -264,7 +356,14 @@ const check = StyleSheet.create({
   labelActive: { color: "#15803d", fontWeight: "600" },
 });
 
+// ─── Paciente view ────────────────────────────────────────────────────────────
+
 function PacienteAnamnese() {
+  const { anamnese, isLoading, submit, isSubmitting } = useAnamnese();
+
+  // Guarda se já existia antes do submit para mensagem correta
+  const jaExistia = useRef(false);
+
   const [idade, setIdade] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
@@ -277,28 +376,103 @@ function PacienteAnamnese() {
   const [sono, setSono] = useState("");
 
   const [historico, setHistorico] = useState<string[]>([]);
-  const [atividade, setAtividade] = useState<string[]>([]);
+  const [atividade, setAtividade] = useState<string>("");
   const [alimentacao, setAlimentacao] = useState<string[]>([]);
   const [habitos, setHabitos] = useState<string[]>([]);
 
-  function toggle(setter: React.Dispatch<React.SetStateAction<string[]>>) {
-    return (item: string) =>
-      setter((prev) =>
-        prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
-      );
-  }
+  // Popula os campos e marca se já existia quando a anamnese carregar
+  useEffect(() => {
+    if (!anamnese) return;
+
+    jaExistia.current = true;
+
+    setIdade(anamnese.idade ? String(anamnese.idade) : "");
+    setPeso(anamnese.peso ?? "");
+    setAltura(anamnese.altura ?? "");
+    setSono(anamnese.horasSono ?? "");
+    setAlergias(anamnese.alergias ?? "");
+    setObjetivo(anamnese.objetivo ?? "");
+    setAtividade(anamnese.nivelAtividade ?? "");
+    setAlimentacao(anamnese.tipoAlimentacao ?? []);
+    setHabitos(anamnese.habitos ?? []);
+
+    const condicoes = anamnese.condicoesSaude ?? [];
+    setHistorico(condicoes.filter((c) => HISTORICO_OPCOES.includes(c)));
+    setOutro(condicoes.filter((c) => !HISTORICO_OPCOES.includes(c)).join(", "));
+  }, [anamnese]);
 
   const bmi =
     peso && altura
       ? (parseFloat(peso) / Math.pow(parseFloat(altura) / 100, 2)).toFixed(1)
       : "";
 
+  function toggleMulti(setter: React.Dispatch<React.SetStateAction<string[]>>) {
+    return (item: string) =>
+      setter((prev) =>
+        prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
+      );
+  }
+
+  async function handleSubmit() {
+    const eraAtualizacao = jaExistia.current;
+    const condicoesSaude = outro.trim()
+      ? [...historico, outro.trim()]
+      : historico;
+
+    const ok = await submit({
+      idade: idade ? parseInt(idade, 10) : null,
+      peso: peso ? parseFloat(peso) : null,
+      altura: altura ? parseFloat(altura) : null,
+      condicoesSaude: condicoesSaude.length ? condicoesSaude : null,
+      alergias: alergias.trim() || null,
+      horasSono: sono ? parseFloat(sono) : null,
+      nivelAtividade:
+        (atividade as "sedentario" | "leve" | "moderado" | "intenso") || null,
+      tipoAlimentacao: alimentacao.length ? alimentacao : null,
+      habitos: habitos.length ? habitos : null,
+      objetivo: objetivo.trim() || null,
+    });
+
+    if (ok) {
+      Alert.alert(
+        "Sucesso",
+        eraAtualizacao
+          ? "Anamnese atualizada com sucesso!"
+          : "Anamnese enviada com sucesso!",
+      );
+    } else {
+      Alert.alert(
+        "Erro",
+        "Não foi possível enviar a anamnese. Tente novamente.",
+      );
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#19c10f" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Anamnese</Text>
-      <Text style={styles.subtitle}>
-        Preencha os dados para que o médico te conheça melhor.
-      </Text>
+
+      {anamnese ? (
+        <View style={styles.fichaPreenchidaBadge}>
+          <Text style={styles.fichaPreenchidaText}>
+            ✅ Ficha preenchida em{" "}
+            {new Date(anamnese.criadoEm).toLocaleDateString("pt-BR")} — edite e
+            salve para atualizar
+          </Text>
+        </View>
+      ) : (
+        <Text style={styles.subtitle}>
+          Preencha os dados para que o médico te conheça melhor.
+        </Text>
+      )}
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Dados básicos</Text>
@@ -359,8 +533,14 @@ function PacienteAnamnese() {
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Histórico de saúde</Text>
         <Text style={styles.label}>Condições pré-existentes</Text>
-        <CheckGroup opcoes={HISTORICO_OPCOES} selected={historico} onToggle={toggle(setHistorico)} />
-        <Text style={[styles.label, { marginTop: 16 }]}>Outro (especificar)</Text>
+        <CheckGroup
+          opcoes={HISTORICO_OPCOES}
+          selected={historico}
+          onToggle={toggleMulti(setHistorico)}
+        />
+        <Text style={[styles.label, { marginTop: 16 }]}>
+          Outro (especificar)
+        </Text>
         <TextInput
           style={styles.inputLarge}
           value={outro}
@@ -386,15 +566,30 @@ function PacienteAnamnese() {
           style={styles.input}
           value={sono}
           onChangeText={setSono}
-          placeholder="Ex: 8h"
+          placeholder="Ex: 8"
           placeholderTextColor="#94a3b8"
+          keyboardType="decimal-pad"
         />
-        <Text style={[styles.label, { marginTop: 16 }]}>Nível de atividade física</Text>
-        <CheckGroup opcoes={ATIVIDADE_OPCOES} selected={atividade} onToggle={toggle(setAtividade)} />
+        <Text style={[styles.label, { marginTop: 16 }]}>
+          Nível de atividade física
+        </Text>
+        <RadioGroup
+          opcoes={ATIVIDADE_OPCOES}
+          selected={atividade}
+          onSelect={setAtividade}
+        />
         <Text style={[styles.label, { marginTop: 16 }]}>Alimentação</Text>
-        <CheckGroup opcoes={ALIMENTACAO_OPCOES} selected={alimentacao} onToggle={toggle(setAlimentacao)} />
+        <CheckGroup
+          opcoes={ALIMENTACAO_OPCOES}
+          selected={alimentacao}
+          onToggle={toggleMulti(setAlimentacao)}
+        />
         <Text style={[styles.label, { marginTop: 16 }]}>Hábitos</Text>
-        <CheckGroup opcoes={HABITOS_OPCOES} selected={habitos} onToggle={toggle(setHabitos)} />
+        <CheckGroup
+          opcoes={HABITOS_OPCOES}
+          selected={habitos}
+          onToggle={toggleMulti(setHabitos)}
+        />
       </View>
 
       <View style={styles.card}>
@@ -410,23 +605,30 @@ function PacienteAnamnese() {
         />
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Arquivos</Text>
-        <Pressable style={({ pressed }) => [styles.uploadBox, pressed && { opacity: 0.75 }]}>
-          <Text style={styles.uploadEmoji}>☁️</Text>
-          <Text style={styles.uploadText}>Clique para adicionar ou arraste arquivos</Text>
-          <Text style={styles.uploadSubtext}>PDF, JPG, PNG até 10MB</Text>
-        </Pressable>
-      </View>
-
-      <Pressable style={({ pressed }) => [styles.button, pressed && { opacity: 0.85 }]}>
-        <Text style={styles.buttonText}>Enviar Anamnese</Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          pressed && { opacity: 0.85 },
+          isSubmitting && { opacity: 0.6 },
+        ]}
+        onPress={handleSubmit}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>
+            {anamnese ? "Atualizar Anamnese" : "Enviar Anamnese"}
+          </Text>
+        )}
       </Pressable>
+
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
 
-// ─── Root ────────────────────────────────────────────────────────────────────
+// ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function Anamnese() {
   const { usuario } = useAuth();
@@ -438,35 +640,32 @@ export default function Anamnese() {
   return <PacienteAnamnese />;
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-    padding: 24,
-  },
-
+  container: { flex: 1, backgroundColor: "#f8fafc", padding: 24 },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f8fafc",
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginBottom: 4,
+  title: { fontSize: 24, fontWeight: "700", color: "#0f172a", marginBottom: 4 },
+  subtitle: { fontSize: 14, color: "#64748b", marginBottom: 24 },
+  fichaPreenchidaBadge: {
+    backgroundColor: "#f0fdf4",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 20,
   },
-
-  subtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    marginBottom: 24,
+  fichaPreenchidaText: {
+    fontSize: 13,
+    color: "#15803d",
+    fontWeight: "500",
+    lineHeight: 18,
   },
-
   searchInput: {
     backgroundColor: "#fff",
     borderWidth: 1.5,
@@ -477,9 +676,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0f172a",
   },
-
   searchFocused: { borderColor: "#19c10f" },
-
   card: {
     backgroundColor: "#fff",
     padding: 20,
@@ -491,86 +688,39 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-
-  patientCard: {
-    borderLeftWidth: 3,
-    borderLeftColor: "transparent",
-  },
-
+  patientCard: { borderLeftWidth: 3, borderLeftColor: "transparent" },
   patientName: {
     fontSize: 16,
     fontWeight: "700",
     color: "#0f172a",
     marginBottom: 8,
   },
-
   summaryRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
     marginBottom: 6,
   },
-
-  summaryItem: {
-    fontSize: 13,
-    color: "#475569",
-    fontWeight: "500",
-  },
-
+  summaryItem: { fontSize: 13, color: "#475569", fontWeight: "500" },
   summaryObjective: {
     fontSize: 13,
     color: "#64748b",
     marginTop: 4,
     lineHeight: 18,
   },
-
-  summaryDate: {
-    fontSize: 11,
-    color: "#94a3b8",
-    marginTop: 8,
-  },
-
+  summaryDate: { fontSize: 11, color: "#94a3b8", marginTop: 8 },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
     color: "#0f172a",
     marginBottom: 14,
   },
-
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 12,
-  },
-
-  inputGroup: {
-    flex: 1,
-  },
-
-  infoItem: {
-    flex: 1,
-    marginBottom: 8,
-  },
-
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 6,
-  },
-
-  value: {
-    fontSize: 14,
-    color: "#0f172a",
-  },
-
-  tagRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 6,
-  },
-
+  row: { flexDirection: "row", gap: 12, marginBottom: 12 },
+  inputGroup: { flex: 1 },
+  infoItem: { flex: 1, marginBottom: 8 },
+  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
+  value: { fontSize: 14, color: "#0f172a" },
+  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 6 },
   tag: {
     backgroundColor: "#f0fdf0",
     borderRadius: 99,
@@ -579,43 +729,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#bbf7d0",
   },
-
-  tagText: {
-    fontSize: 12,
-    color: "#15803d",
-    fontWeight: "500",
-  },
-
+  tagText: { fontSize: 12, color: "#15803d", fontWeight: "500" },
   footerMeta: {
     fontSize: 12,
     color: "#94a3b8",
     textAlign: "right",
     marginBottom: 8,
   },
-
   emptyText: {
     fontSize: 14,
     color: "#94a3b8",
     textAlign: "center",
     marginTop: 32,
   },
-
-  errorText: {
-    fontSize: 14,
-    color: "#ef4444",
-  },
-
-  backBtn: {
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-
-  backBtnText: {
-    fontSize: 14,
-    color: "#19c10f",
-    fontWeight: "600",
-  },
-
+  errorText: { fontSize: 14, color: "#ef4444" },
+  backBtn: { paddingVertical: 8, marginBottom: 12 },
+  backBtnText: { fontSize: 14, color: "#19c10f", fontWeight: "600" },
   input: {
     backgroundColor: "#f1f5f9",
     borderWidth: 1.5,
@@ -625,15 +754,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0f172a",
   },
-
   inputFocused: { borderColor: "#19c10f", backgroundColor: "#fff" },
-
   inputReadonly: { justifyContent: "center" },
-
   bmiValue: { fontSize: 14, color: "#0f172a", fontWeight: "600" },
-
   bmiPlaceholder: { fontSize: 13, color: "#94a3b8" },
-
   inputLarge: {
     backgroundColor: "#f1f5f9",
     borderWidth: 1.5,
@@ -645,28 +769,6 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: "top",
   },
-
-  uploadBox: {
-    borderWidth: 2,
-    borderColor: "#e2e8f0",
-    borderStyle: "dashed",
-    padding: 32,
-    borderRadius: 12,
-    alignItems: "center",
-    backgroundColor: "#f8fafc",
-  },
-
-  uploadEmoji: { fontSize: 32, marginBottom: 10 },
-
-  uploadText: {
-    fontSize: 14,
-    color: "#475569",
-    fontWeight: "500",
-    textAlign: "center",
-  },
-
-  uploadSubtext: { fontSize: 12, color: "#94a3b8", marginTop: 4 },
-
   button: {
     backgroundColor: "#19c10f",
     padding: 16,
@@ -679,6 +781,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-
-  buttonText: { color: "#fff", fontWeight: "700", fontSize: 16, letterSpacing: 0.3 },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
 });

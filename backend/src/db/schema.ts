@@ -1,15 +1,15 @@
 import {
+  boolean,
+  integer,
+  json,
+  numeric,
+  pgEnum,
   pgTable,
   serial,
   text,
-  varchar,
-  integer,
-  numeric,
   timestamp,
-  pgEnum,
-  json,
-  boolean,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const tipoUsuarioEnum = pgEnum("tipo_usuario", ["paciente", "medico"]);
@@ -29,7 +29,10 @@ export const nivelAtividadeEnum = pgEnum("nivel_atividade", [
   "moderado",
   "intenso",
 ]);
-export const tipoConsultaEnum = pgEnum("tipo_consulta", ["presencial", "teleconsulta"]);
+export const tipoConsultaEnum = pgEnum("tipo_consulta", [
+  "presencial",
+  "teleconsulta",
+]);
 
 export const usuarios = pgTable("usuarios", {
   id: serial("id").primaryKey(),
@@ -60,17 +63,6 @@ export const anamneses = pgTable("anamneses", {
   objetivo: text("objetivo"),
   criadoEm: timestamp("criado_em").defaultNow().notNull(),
   atualizadoEm: timestamp("atualizado_em").defaultNow().notNull(),
-});
-
-export const arquivosAnamnese = pgTable("arquivos_anamnese", {
-  id: serial("id").primaryKey(),
-  anamneseId: integer("anamnese_id")
-    .references(() => anamneses.id)
-    .notNull(),
-  nomeArquivo: varchar("nome_arquivo", { length: 255 }).notNull(),
-  url: text("url").notNull(),
-  tipoMime: varchar("tipo_mime", { length: 100 }),
-  criadoEm: timestamp("criado_em").defaultNow().notNull(),
 });
 
 export const consultas = pgTable("consultas", {
@@ -173,7 +165,7 @@ export const disponibilidadeMedicos = pgTable(
     uniqueIndex("disponibilidade_medico_slot_unique").on(
       table.medicoId,
       table.diaSemana,
-      table.horarioInicio
+      table.horarioInicio,
     ),
-  ]
+  ],
 );
