@@ -13,6 +13,10 @@ import pagamentosRouter from "./routes/pagamentos";
 import protocolosRouter from "./routes/protocolos";
 import usersRouter from "./routes/users";
 
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:8081"];
+
 const app = express();
 
 app.use(express.json());
